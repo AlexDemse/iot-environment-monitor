@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from pymongo import MongoClient
 import mysql.connector
+from neo4j import GraphDatabase
 
 #connection to MongoDB
 client = MongoClient("mongodb://localhost:27017/")
@@ -18,6 +19,17 @@ mysql_connection = mysql.connector.connect(
 )
 mysql_cursor = mysql_connection.cursor()
 
+#connection to Neo4j
+NEO4J_URL = "bolt://localhost:7687" 
+NEO4J_USERNAME = "neo4j"
+NEO4J_PASSWORD = "root12345"
+
+neo4j_driver = GraphDatabase.driver(
+    NEO4J_URL,
+    auth=(NEO4J_USERNAME, NEO4J_PASSWORD)
+)
+
+
 #connection to MQTT broker
 BROKER = "localhost"
 PORT = 1883
@@ -32,6 +44,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     data = json.loads(payload)
+
     #insertion into MongoDB
     mongo_result = collection.insert_one(data.copy())
     print(f"Data inserted into MongoDB with id: {mongo_result.inserted_id}")
@@ -54,6 +67,30 @@ def on_message(client, userdata, msg):
     mysql_connection.commit()
 
     print("Data inserted into MySQL")
+
+    #insertion into neo4j
+    with neo4j_driver.session() as session:
+        session.run(
+            """
+            MERGE (s:Sensor {sensor_id: $sensor_id})
+        SET s.last_temperature = $temperature,
+            s.last_humidity = $humidity,
+            s.last_air_quality = $air_quality,
+            s.last_seen = $timestamp
+
+        MERGE (l:Location {name: $location})
+        MERGE (s)-[:LOCATED_IN]->(l)
+        """,
+        sensor_id=data["sensor_id"],
+        location=data["location"],
+        temperature=data["temperature"],
+        humidity=data["humidity"],
+        air_quality=data["air_quality"],
+        timestamp=data["timestamp"]
+    )
+
+    print("Data inserted into Neo4j!")
+
 
     #display recieved message in terminal 
     print("\n New Sensor Data Received:")

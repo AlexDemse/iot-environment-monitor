@@ -22,3 +22,6 @@ A Python processing application receives the data and stores it into multiple da
 ## Data Flow
 
 Sensors → MQTT Broker → Python Processor → Databases
+
+## commands used
+- docker run -it -p 1883:1883 eclipse-mosquitto
