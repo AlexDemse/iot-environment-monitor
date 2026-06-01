@@ -6,7 +6,7 @@ from datetime import datetime
 
 BROKER = "localhost"
 PORT = 1883
-TOPIC = "sensors/temperatute"
+TOPIC = "sensors/temperature"
 
 client = mqtt.Client()
 
