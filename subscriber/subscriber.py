@@ -1,4 +1,6 @@
 import paho.mqtt.client as mqtt
+import json
+from datetime import datetime
 
 BROKER = "localhost"
 PORT = 1883
@@ -11,7 +13,16 @@ def on_connect(client, userdata, flags, rc):
 
 #called when message is received
 def on_message(client, userdata, msg):
-    print(f"Received message: {msg.payload.decode()}")
+    payload = msg.payload.decode()
+    data = json.loads(payload)
+
+    print("\n New Sensor Data Received:")
+    print(f"Sensor ID: {data['sensor_id']}")
+    print(f"Temperature: {data['temperature']}°C")
+    print(f"Humidity: {data['humidity']}%")
+    print(f"Air Quality: {data['air_quality']}")
+    print(f"Timestamp: {datetime.fromisoformat(data['timestamp'])}")
+    print(f"Location: {data['location']}")
 
 client = mqtt.Client()
 
