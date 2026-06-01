@@ -6,9 +6,11 @@
 - Installed Paho MQTT library
 - Successfully ran Mosquitto using Docker
 - Implemented MQTT publisher and subscriber
-- Verified successful message transmission
+- First successful message transmission
+- Message(data) is not persistant(not being saved)
 
-## MQTT Communication Successful
+
+## MQTT Integration
 
 - Installed Paho MQTT library
 - Ran Eclipse Mosquitto using Docker
@@ -16,35 +18,38 @@
 - Created MQTT subscriber application
 - Successfully transmitted JSON sensor data through MQTT topics
 - Verified communication between publisher and subscriber
+- Message(data) not persistant(not being saved)
 
-## MongoDB Integration Started
+Flow :
+Publisher -> Mosquitto MQTT Broker -> Subscriber 
 
-- Installed the `pymongo` Python library.
-- Started a MongoDB container using Docker.
-- Tested Python connection to MongoDB.
-- Created `iot_database` database.
-- Created `sensor_data` collection.
-- Updated the MQTT subscriber to decode incoming JSON messages.
-- Inserted received sensor readings into MongoDB.
-- Verified that MQTT data is now being stored persistently instead of only being printed.
+## MongoDB Integration 
+
+- Installed the `pymongo` Python library
+- Started a MongoDB container using Docker
+- Tested Python connection to MongoDB
+- Created `iot_database` database
+- Created `sensor_data` collection
+- Updated the MQTT subscriber to decode incoming JSON messages
+- Inserted received sensor readings into MongoDB
+- Verified that MQTT message(data) is persistant (saved)
 - Installed MongoDB Compass to visually see the data 
 
-Current flow:
+Flow:
+Publisher -> Mosquitto MQTT Broker -> Subscriber -> MongoDB
 
-Publisher → Mosquitto MQTT Broker → Subscriber → MongoDB
+## MySQL Integration 
 
-## MySQL Integration Started
+- Started a MySQL container using Docker
+- Created a MySQL Workbench connection named `iot_DB`
+- Created the `iot_database` database
+- Created the `sensor_readings` table for structured environmental data
+- Installed the `mysql-connector-python` library
+- Integrated Python subscriber into MySQL and MongoDB
 
-- Started a MySQL container using Docker.
-- Created a MySQL Workbench connection named `iot_DB`.
-- Created the `iot_database` database.
-- Created the `sensor_readings` table for structured environmental data.
-- Installed the `mysql-connector-python` library.
-- Prepared to connect the Python subscriber to MySQL.
+Flow:
+Publisher -> Mosquitto MQTT Broker -> Subscriber -> MongoDB + MySQL 
 
-Current system flow:
+## Neo4j Integration
 
-Publisher → Mosquitto MQTT Broker → Subscriber → MongoDB  
-Next target:
 
-Publisher → Mosquitto MQTT Broker → Subscriber → MongoDB + MySQL
