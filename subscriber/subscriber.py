@@ -1,7 +1,14 @@
 import paho.mqtt.client as mqtt
 import json
 from datetime import datetime
+from pymongo import MongoClient
 
+#connection to MongoDB
+client = MongoClient("mongodb://localhost:27017/")
+db = client["iot_database"]
+collection = db["sensor_data"]
+
+#connection to MQTT broker
 BROKER = "localhost"
 PORT = 1883
 TOPIC = "sensors/temperatute"
@@ -15,6 +22,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     data = json.loads(payload)
+    collection.insert_one(data)
+    print("Data stored in MongoDB")
 
     print("\n New Sensor Data Received:")
     print(f"Sensor ID: {data['sensor_id']}")

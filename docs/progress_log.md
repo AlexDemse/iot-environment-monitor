@@ -1,6 +1,6 @@
 # Progress Log
 
-## Day 1
+## SETUP
 - Initialized Git repository
 - Created GitHub repository
 - Installed Paho MQTT library
@@ -16,3 +16,18 @@
 - Created MQTT subscriber application
 - Successfully transmitted JSON sensor data through MQTT topics
 - Verified communication between publisher and subscriber
+
+## MongoDB Integration Started
+
+- Installed the `pymongo` Python library.
+- Started a MongoDB container using Docker.
+- Tested Python connection to MongoDB.
+- Created `iot_database` database.
+- Created `sensor_data` collection.
+- Updated the MQTT subscriber to decode incoming JSON messages.
+- Inserted received sensor readings into MongoDB.
+- Verified that MQTT data is now being stored persistently instead of only being printed.
+
+Current flow:
+
+Publisher → Mosquitto MQTT Broker → Subscriber → MongoDB
