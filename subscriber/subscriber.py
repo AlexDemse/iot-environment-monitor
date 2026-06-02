@@ -47,14 +47,14 @@ def on_message(client, userdata, msg):
     data = json.loads(payload)
 
     #display recieved message in terminal 
-    print("\n New Sensor Data Received:")
-    print(f"TOPIC: {topic}")
-    print(f"Sensor ID: {data['sensor_id']}")
-    print(f"Temperature: {data['temperature']}°C")
-    print(f"Humidity: {data['humidity']}%")
-    print(f"Air Quality: {data['air_quality']}")
-    print(f"Timestamp: {datetime.fromisoformat(data['timestamp'])}")
-    print(f"Location: {data['location']}")
+    #print("\n New Sensor Data Received:")
+    #print(f"TOPIC: {topic}")
+    #print(f"Sensor ID: {data['sensor_id']}")
+    #print(f"Temperature: {data['temperature']}°C")
+    #print(f"Humidity: {data['humidity']}%")
+    #print(f"Air Quality: {data['air_quality']}")
+    #print(f"Timestamp: {datetime.fromisoformat(data['timestamp'])}")
+    #print(f"Location: {data['location']}"
 
     
     if topic == "sensors/enviroment":
@@ -130,22 +130,22 @@ def on_message(client, userdata, msg):
             session.run(
                 """
                 MERGE (s:Sensor {sensor_id: $sensor_id})
-            SET s.last_temperature = $temperature,
-                s.last_humidity = $humidity,
-                s.last_air_quality = $air_quality,
-                s.last_seen = $timestamp
+                MERGE (g:Gateway {name: $gateway})
+                MERGE (l:Location {name: $location})
 
-            MERGE (l:Location {name: $location})
-            MERGE (s)-[:LOCATED_IN]->(l)
-            """,
-            sensor_id=data["sensor_id"],
-            location=data["location"],
-            temperature=data["temperature"],
-            humidity=data["humidity"],
-            air_quality=data["air_quality"],
-            timestamp=data["timestamp"]
-        )
-        print("Network relationship inserted into Neo4j!")
+                MERGE (s)-[c:CONNECTED_TO]->(g)
+                SET c.signal_strength = $signal_strength
+
+                MERGE (s)-[:LOCATED_IN]->(l)
+                MERGE (g)-[:LOCATED_IN]->(l)
+                """,
+                sensor_id=data["sensor_id"],
+                gateway=data["connected_to"],
+                location=data["location"],
+                signal_strength=data["signal_strength"]
+            )
+
+        print("Network relationship inserted into Neo4j")
     
     else:
         print("unknown topic", topic)

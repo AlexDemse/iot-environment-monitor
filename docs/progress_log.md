@@ -68,4 +68,6 @@ Flow:
 - `sensors/environment` -> MongoDB + MySQL
 - `sensors/network` -> Neo4j
 
-
+## MongoDB
+- Update MongoDB to include enriched enviromental events and alerts in subscriber
+- MongoDB give alerts on temps, air_quality and humidity 
