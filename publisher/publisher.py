@@ -6,7 +6,7 @@ from datetime import datetime
 
 BROKER = "localhost"
 PORT = 1883
-TOPIC = "sensors/temperature"
+topic = "sensors/enviroment"
 
 client = mqtt.Client()
 
@@ -23,7 +23,7 @@ while True:
     }
     message = json.dumps(sensor_data)
 
-    client.publish(TOPIC, message)
+    client.publish(topic, message)
 
     print(f"Published: {message}")
 

@@ -50,6 +50,22 @@ Publisher -> Mosquitto MQTT Broker -> Subscriber -> MongoDB
 Flow:
 Publisher -> Mosquitto MQTT Broker -> Subscriber -> MongoDB + MySQL 
 
-## Neo4j Integration
+## Neo4j Integration and Topic-Based Routing
+
+- Installed and tested the official Neo4j Python driver.
+- Connected the Python subscriber application to Neo4j using the Bolt protocol.
+- Created graph nodes for sensors and locations.
+- Created `LOCATED_IN` relationships between sensors and their locations.
+- Verified the graph visually in Neo4j Browser.
+- Refactored the subscriber to use topic-based routing.
+- Updated the MQTT subscriber topic to `sensors/#` so it can receive multiple sensor topics.
+- Routed `sensors/environment` messages to MongoDB and MySQL.
+- Routed `sensors/network` messages to Neo4j.
+- Fixed topic handling using `msg.topic`.
+- Confirmed that data is now stored according to message type instead of being sent blindly to every database.
+
+Flow:
+- `sensors/environment` -> MongoDB + MySQL
+- `sensors/network` -> Neo4j
 
 
