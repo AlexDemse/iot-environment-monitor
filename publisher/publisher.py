@@ -15,7 +15,7 @@ client.connect(BROKER, PORT)
 while True:
     sensor_data = {
         "sensor_id": "5001",
-        "temperature": round(random.uniform(20, 35), 2),
+        "temperature": round(random.uniform(30, 45), 2),
         "humidity": round(random.uniform(40, 70), 2),
         "air_quality": round(random.uniform(0, 100), 2),
         "timestamp": datetime.now().isoformat(),

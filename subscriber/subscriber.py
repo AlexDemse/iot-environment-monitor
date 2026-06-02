@@ -59,9 +59,51 @@ def on_message(client, userdata, msg):
     
     if topic == "sensors/enviroment":
 
+        #insertion into mongoDB
+        alerts = []
+
+        if data["temperature"] > 35:
+            alerts.append({
+                "type": "temperature",
+                "level": "high",
+                "message": "High temperature detected"
+            })
+
+        if data["humidity"] > 70:
+            alerts.append({
+                "type": "humidity",
+                "level": "high",
+                "message": "High humidity detected"
+            })
+
+        if data["air_quality"] > 150:
+            alerts.append({
+                "type": "air_quality",
+                "level": "danger",
+                "message": "Poor air quality detected"
+            })
+
+        mongo_document = {
+            "sensor_id": data["sensor_id"],
+            "location": data["location"],
+            "readings": {
+                "temperature": data["temperature"],
+                "humidity": data["humidity"],
+                "air_quality": data["air_quality"]
+            },
+            "alerts": alerts,
+            "has_alert": len(alerts) > 0,
+            "timestamp": data["timestamp"],
+            "source_topic": topic
+        }
+
+        collection.insert_one(mongo_document)
+        print("Event inserted into MongoDB")
+        
+
         #insertion into MongoDB
-        mongo_result = collection.insert_one(data.copy())
-        print(f"Data inserted into MongoDB with id: {mongo_result.inserted_id}")
+        #mongo_result = collection.insert_one(data.copy())
+        #print(f"Data inserted into MongoDB with id: {mongo_result.inserted_id}")
 
         #insertion into MySQL
         sql = """
