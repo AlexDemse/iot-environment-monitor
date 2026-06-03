@@ -1,3 +1,3 @@
 # IoT Environment Monitoring System
 
-MQTT + Python + MySQL + MongoDB + Neo4j project.
+Publisher(python) + MQTT(Broker) + Subscriber(Python) + MySQL + MongoDB + Neo4j project.
