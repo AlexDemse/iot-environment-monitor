@@ -71,3 +71,55 @@ Flow:
 ## MongoDB
 - Update MongoDB to include enriched enviromental events and alerts in subscriber
 - MongoDB give alerts on temps, air_quality and humidity 
+
+## Event Enrichment and Neo4j Network Topology
+
+- Refactored the system to use topic-based routing instead of sending every message to all databases.
+- Updated the subscriber to subscribe to `sensors/#`.
+- Implemented routing logic using `msg.topic`.
+
+### Environment Topic
+- `sensors/environment` messages are now routed to:
+  - MongoDB
+  - MySQL
+
+### MongoDB Improvements
+- Refactored MongoDB storage into enriched event documents.
+- Added nested `readings` objects.
+- Added `alerts` arrays.
+- Added `has_alert` status field.
+- Implemented alert generation logic inside the subscriber.
+- Alerts are generated based on environmental thresholds:
+  - High temperature
+  - High humidity
+  - Poor air quality
+
+### MySQL Role
+- MySQL now stores clean structured environmental measurements for reporting and analysis.
+
+### Neo4j Improvements
+- Refactored Neo4j to focus on graph relationships instead of telemetry storage.
+- Added support for `sensors/network` topic.
+- Created a dedicated `network_publisher.py`.
+- Added graph modeling for:
+  - Sensor nodes
+  - Gateway nodes
+  - Location nodes
+- Created graph relationships:
+  - `CONNECTED_TO`
+  - `LOCATED_IN`
+
+Current routing architecture:
+
+- `sensors/environment` → MongoDB + MySQL
+- `sensors/network` → Neo4j
+
+Current architecture:
+
+Publisher(s)
+    ↓
+Mosquitto MQTT Broker
+    ↓
+Subscriber Processing Engine
+    ↓
+MongoDB / MySQL / Neo4j

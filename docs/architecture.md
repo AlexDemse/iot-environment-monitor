@@ -1,27 +1,40 @@
 # System Architecture
 
-## Project Overview
+## Project Title
 
-The system simulates IoT environmental sensors that send data through MQTT.
+IoT Environmental Monitoring System using MQTT, Python, MySQL, MongoDB, and Neo4j
 
-A Python processing application receives the data and stores it into multiple database systems depending on the data type and usage.
+## Overview
 
----
+This project simulates an IoT environmental monitoring system. Sensor data is published through MQTT, received by a Python subscriber, processed, and then routed to different database platforms based on the MQTT topic and the type of data.
+
 
 ## Main Components
 
-1. Simulated IoT Sensors
-2. MQTT Broker (Mosquitto)
-3. Python Processing Application
-4. MySQL Database
-5. MongoDB Database
-6. Neo4j Graph Database
+1. Sensor Publishers  
+   Simulate IoT devices that generate environmental and network data. 
 
----
+2. Mosquitto MQTT Broker  
+   Receives messages from publishers and forwards them to subscribers based on topics.
+
+3. Python Subscriber / Processing Engine  
+   Subscribes to MQTT topics, processes incoming JSON messages, generates alerts, and routes data to the appropriate database.
+
+4. MongoDB  
+   Stores enriched environmental event documents, including nested readings and alerts.
+
+5. MySQL  
+   Stores clean structured environmental readings for reporting and analysis.
+
+6. Neo4j  
+   Stores graph relationships between sensors, gateways, and locations.
 
 ## Data Flow
 
-Sensors → MQTT Broker → Python Processor → Databases
-
-## commands used
-- docker run -it -p 1883:1883 eclipse-mosquitto
+Sensor Publishers
+        ↓
+Mosquitto MQTT Broker
+        ↓
+Python Subscriber / Processing Engine
+        ↓
+MongoDB + MySQL + Neo4j
