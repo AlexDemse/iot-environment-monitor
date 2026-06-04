@@ -109,10 +109,23 @@ Flow:
   - `CONNECTED_TO`
   - `LOCATED_IN`
 
+## Data Validation and Alert Enrichment
+
+- Added validation before inserting environmental readings into MySQL.
+- MySQL now stores only complete and valid structured sensor data.
+- Added value range checks for temperature, humidity, and air quality.
+- MongoDB now stores enriched alert objects with:
+  - alert type
+  - severity level
+  - measured value
+  - threshold value
+  - alert message
+- MongoDB keeps full event/alert evidence, while MySQL stores clean analytical data.
+
 Current routing architecture:
 
-- `sensors/environment` → MongoDB + MySQL
-- `sensors/network` → Neo4j
+- sensors/environment -> MongoDB + MySQL
+- sensors/network -> Neo4j
 
 Current architecture:
 

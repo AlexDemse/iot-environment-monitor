@@ -66,6 +66,8 @@ def on_message(client, userdata, msg):
             alerts.append({
                 "type": "temperature",
                 "level": "high",
+                "value": data["temperature"],
+                "threshold" :35,
                 "message": "High temperature detected"
             })
 
@@ -73,6 +75,8 @@ def on_message(client, userdata, msg):
             alerts.append({
                 "type": "humidity",
                 "level": "high",
+                "value": data["humidity"],
+                "threshold" 70,
                 "message": "High humidity detected"
             })
 
@@ -80,6 +84,8 @@ def on_message(client, userdata, msg):
             alerts.append({
                 "type": "air_quality",
                 "level": "danger",
+                "value": data["air_quality"],
+                "threshold": 150,
                 "message": "Poor air quality detected"
             })
 
@@ -99,30 +105,44 @@ def on_message(client, userdata, msg):
 
         collection.insert_one(mongo_document)
         print("Event inserted into MongoDB")
-        
-
-        #insertion into MongoDB
-        #mongo_result = collection.insert_one(data.copy())
-        #print(f"Data inserted into MongoDB with id: {mongo_result.inserted_id}")
 
         #insertion into MySQL
-        sql = """
-        INSERT INTO sensor_readings
-        (sensor_id, location, temperature, humidity, air_quality, timestamp)
-        VALUES(%s,%s,%s,%s,%s,%s)
-        """
-        values = (
-            data["sensor_id"],
-            data["location"],
-            data["temperature"],
-            data["humidity"],
-            data["air_quality"],
-            data["timestamp"]
-        )
-        mysql_cursor.execute(sql, values)
-        mysql_connection.commit()
-        print("Data inserted into MySQL")
-
+        required_fields = [
+            "sensor_id",
+            "location",
+            "temperature",
+            "humidity",
+            "air_quality",
+            "timestamp"
+        ]
+        has_required_fields = all(field in data for field in required_fields)
+        if has_required_fields:
+            valid_ranges = (
+                -50 <= data["temperature"] <= 60 and
+                0 <= data["humidity"] <= 100 and
+                data["air_quality"] >= 0
+            )
+            if has_required_fields and valid_ranges:
+                sql = """
+                INSERT INTO sensor_readings
+                (sensor_id, location, temperature, humidity, air_quality, timestamp)
+                VALUES(%s,%s,%s,%s,%s,%s)
+                """
+                values = (
+                    data["sensor_id"],
+                    data["location"],
+                    data["temperature"],
+                    data["humidity"],
+                    data["air_quality"],
+                    data["timestamp"]
+                )
+                mysql_cursor.execute(sql, values)
+                mysql_connection.commit()
+                print("Valid data inserted into MySQL")
+            else:
+                print("Invalid data no MySQL insert")
+        else:
+            print("missing fields")
 
     elif topic == "sensors/network":
         #insertion into neo4j
