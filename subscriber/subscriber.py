@@ -33,12 +33,64 @@ neo4j_driver = GraphDatabase.driver(
 #connection to MQTT broker
 BROKER = "localhost"
 PORT = 1883
-topic = "sensors/#"
+TOPIC = "sensors/#"
 
 #called on connection successful
 def on_connect(client, userdata, flags, rc):
     print("connected to MQTT!")
-    client.subscribe(topic)
+    client.subscribe(TOPIC)
+
+#define functions
+def generate_alerts(data):
+    alerts = []
+
+    if data["temperature"] > 35:
+        alerts.append({
+            "type": "temperature",
+            "level": "high",
+            "value": data["temperature"],
+            "threshold": 35,
+            "message": "High temperature detected"
+        })
+
+    if data["humidity"] > 70:
+        alerts.append({
+            "type": "humidity",
+            "level": "high",
+            "value": data["humidity"],
+            "threshold": 70,
+            "message": "High humidity detected"
+        })
+
+    if data["air_quality"] > 150:
+        alerts.append({
+            "type": "air_quality",
+            "level": "danger",
+            "value": data["air_quality"],
+            "threshold": 150,
+            "message": "Poor air quality detected"
+        })
+
+    return alerts
+
+def is_valid_for_mysql(data):
+    required_fields = [
+        "sensor_id",
+        "location",
+        "temperature",
+        "humidity",
+        "air_quality",
+        "timestamp"
+    ]
+    has_required_fields = all(field in data for field in required_fields)
+    if not has_required_fields:
+        return False
+
+    return (
+        -50 <= data["temperature"] <= 60 and
+        0 <= data["humidity"] <= 100 and
+        data["air_quality"] >= 0
+    )
 
 #called when message is received
 def on_message(client, userdata, msg):
@@ -46,49 +98,9 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     data = json.loads(payload)
 
-    #display recieved message in terminal 
-    #print("\n New Sensor Data Received:")
-    #print(f"TOPIC: {topic}")
-    #print(f"Sensor ID: {data['sensor_id']}")
-    #print(f"Temperature: {data['temperature']}°C")
-    #print(f"Humidity: {data['humidity']}%")
-    #print(f"Air Quality: {data['air_quality']}")
-    #print(f"Timestamp: {datetime.fromisoformat(data['timestamp'])}")
-    #print(f"Location: {data['location']}"
-
-    
-    if topic == "sensors/enviroment":
-
+    if topic == "sensors/environment":
         #insertion into mongoDB
-        alerts = []
-
-        if data["temperature"] > 35:
-            alerts.append({
-                "type": "temperature",
-                "level": "high",
-                "value": data["temperature"],
-                "threshold" :35,
-                "message": "High temperature detected"
-            })
-
-        if data["humidity"] > 70:
-            alerts.append({
-                "type": "humidity",
-                "level": "high",
-                "value": data["humidity"],
-                "threshold" 70,
-                "message": "High humidity detected"
-            })
-
-        if data["air_quality"] > 150:
-            alerts.append({
-                "type": "air_quality",
-                "level": "danger",
-                "value": data["air_quality"],
-                "threshold": 150,
-                "message": "Poor air quality detected"
-            })
-
+        alerts = generate_alerts(data)
         mongo_document = {
             "sensor_id": data["sensor_id"],
             "location": data["location"],
@@ -102,49 +114,44 @@ def on_message(client, userdata, msg):
             "timestamp": data["timestamp"],
             "source_topic": topic
         }
-
         collection.insert_one(mongo_document)
-        print("Event inserted into MongoDB")
+        print("\nEvent inserted into MongoDB")
 
         #insertion into MySQL
-        required_fields = [
-            "sensor_id",
-            "location",
-            "temperature",
-            "humidity",
-            "air_quality",
-            "timestamp"
-        ]
-        has_required_fields = all(field in data for field in required_fields)
-        if has_required_fields:
-            valid_ranges = (
-                -50 <= data["temperature"] <= 60 and
-                0 <= data["humidity"] <= 100 and
-                data["air_quality"] >= 0
+        if is_valid_for_mysql(data):
+            sql = """
+            INSERT INTO sensor_readings
+            (sensor_id, location, temperature, humidity, air_quality, timestamp)
+            VALUES(%s,%s,%s,%s,%s,%s)
+            """
+            values = (
+                data["sensor_id"],
+                data["location"],
+                data["temperature"],
+                data["humidity"],
+                data["air_quality"],
+                data["timestamp"]
             )
-            if has_required_fields and valid_ranges:
-                sql = """
-                INSERT INTO sensor_readings
-                (sensor_id, location, temperature, humidity, air_quality, timestamp)
-                VALUES(%s,%s,%s,%s,%s,%s)
-                """
-                values = (
-                    data["sensor_id"],
-                    data["location"],
-                    data["temperature"],
-                    data["humidity"],
-                    data["air_quality"],
-                    data["timestamp"]
-                )
-                mysql_cursor.execute(sql, values)
-                mysql_connection.commit()
-                print("Valid data inserted into MySQL")
-            else:
-                print("Invalid data no MySQL insert")
+            mysql_cursor.execute(sql, values)
+            mysql_connection.commit()
+            print("Valid data inserted into MySQL")
         else:
-            print("missing fields")
+            print("Invalid data no insert into MySQL")
 
     elif topic == "sensors/network":
+        #insertion to MongoDB
+        network_document = {
+            "event_type": "network",
+            "sensor_id": data["sensor_id"],
+            "location": data["location"],
+            "connected_to": data["connected_to"],
+            "signal_strength": data["signal_strength"],
+            "source_topic": topic
+        }
+
+        collection.insert_one(network_document)
+        print("Network event stored in MongoDB")
+
         #insertion into neo4j
         with neo4j_driver.session() as session:
             session.run(
