@@ -201,5 +201,7 @@ Stores:
 * gateway connections
 * location topology
 
-Author
-AlexDemse
+
+
+Author: Alex Demse
+University of Messina - Data Analysis Program
