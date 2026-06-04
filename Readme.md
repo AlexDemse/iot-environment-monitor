@@ -200,6 +200,3 @@ Stores:
 * sensor relationships
 * gateway connections
 * location topology
-
-```
-```
