@@ -105,12 +105,6 @@ Neo4j stores graph relationships and network topology information.
 - CONNECTED_TO
 - LOCATED_IN
 
-## Example Graph
-
-(Sensor)-[:CONNECTED_TO]->(Gateway)
-
-(Sensor)-[:LOCATED_IN]->(Location)
-
 ---
 
 # Polyglot Persistence
