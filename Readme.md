@@ -98,6 +98,14 @@ docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=root123 -e MYSQL_DATABASE=i
 docker run -it --name mosquitto -p 1883:1883 eclipse-mosquitto
 ```
 
+## Running Services with Docker Compose
+
+Start MongoDB, MySQL, and Mosquitto:
+
+```bash
+docker compose up -d
+
+
 ---
 
 ## Neo4j Setup
