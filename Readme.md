@@ -1,216 +1,226 @@
-# IoT Environmental Monitoring System
+# IoT Environment Monitoring System
 
-## Overview
+## Project Overview
 
-This project implements an IoT environmental monitoring system using MQTT, Python, MongoDB, MySQL, and Neo4j.
+This project demonstrates the integration of MQTT and Python for real-time IoT data collection, analysis, and storage using multiple database technologies.
 
-The system simulates IoT devices that publish environmental and network data through MQTT topics. A Python subscriber receives the messages, processes the data, generates alerts, validates measurements, and routes the information to different databases based on the topic and data type.
+The system receives environmental and network sensor data through MQTT topics and stores the data in different databases according to its purpose:
+
+* MongoDB: Stores raw sensor readings and alerts.
+* MySQL: Stores validated environmental data.
+* Neo4j: Stores network relationships between sensors and gateways.
 
 ---
 
-# Technologies Used
+## Technologies Used
 
-* Python 3
-* MQTT
-* Eclipse Mosquitto
+* Python
+* MQTT (Mosquitto Broker)
 * MongoDB
 * MySQL
 * Neo4j
-* Docker
+* Docker Compose
 
 ---
 
-# System Architecture
+## Project Structure
 
-Publishers
-→ Mosquitto MQTT Broker
-→ Python Subscriber
-→ MongoDB / MySQL / Neo4j
-
----
-
-# MQTT Topics
-
-## sensors/environment
-
-Used for:
-
-* temperature
-* humidity
-* air quality
-
-Routing:
-
-* MongoDB
-* MySQL
-
----
-
-## sensors/network
-
-Used for:
-
-* gateway connections
-* signal strength
-* network topology
-
-Routing:
-
-* MongoDB
-* Neo4j
-
----
-
-# Installation
-
-## Clone Repository
-
-## Install Python Dependencies
-
-```bash
-pip install paho-mqtt
-pip install pymongo
-pip install mysql-connector-python
-pip install neo4j
+```text
+iot-environment-monitor/
+│
+├── publisher/
+│   ├── publisher.py
+│   └── network_publisher.py
+│
+├── subscriber/
+│   └── subscriber.py
+│
+├── database/
+│   └── schema.sql
+│
+├── docker-compose.yml
+│
+└── README.md
 ```
 
 ---
 
-## Run MongoDB
+## Docker Setup
 
-```bash
-docker run -d --name mongodb -p 27017:27017 mongo
-```
-
----
-
-## Run MySQL
-
-```bash
-docker run -d --name mysql-db -e MYSQL_ROOT_PASSWORD=root123 -e MYSQL_DATABASE=iot_database -p 3306:3306 mysql
-```
-
----
-
-## Run Mosquitto MQTT Broker
-
-```bash
-docker run -it --name mosquitto -p 1883:1883 eclipse-mosquitto
-```
-
-## Running Services with Docker Compose
-
-Start MongoDB, MySQL, and Mosquitto:
+Start all required services:
 
 ```bash
 docker compose up -d
+```
 
+Verify services are running:
+
+```bash
+docker ps
+```
+
+Expected containers:
+
+```text
+mosquitto
+mongodb
+mysql-db
+```
+
+Stop services:
+
+```bash
+docker compose down
+```
+
+---
+
+## MySQL Setup
+
+Create the database structure:
+
+```bash
+docker exec -i mysql-db mysql -u root -proot123 < database/schema.sql
+```
 
 ---
 
 ## Neo4j Setup
 
-1. Install Neo4j Desktop
-2. Create a local database
-3. Start the database
+This project uses Neo4j Desktop.
 
-Connection URL:
+1. Install Neo4j Desktop.
+2. Create a local database.
+3. Set:
 
 ```text
-bolt://localhost:7687
+Username: neo4j
+Password: root12345
 ```
+
+4. Start the database.
 
 ---
 
-# Create MySQL Table
+## Running the System
 
-```sql
-CREATE TABLE sensor_readings (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sensor_id VARCHAR(50),
-    location VARCHAR(100),
-    temperature FLOAT,
-    humidity FLOAT,
-    air_quality INT,
-    timestamp VARCHAR(100)
-);
-```
-
----
-
-# Running the System
-
-## Terminal 1
-
-Start Mosquitto:
+### Start the Subscriber
 
 ```bash
-docker start mosquitto
+python subscriber/subscriber.py
 ```
 
----
-
-## Terminal 2
-
-Run subscriber:
+### Start the Environmental Publisher
 
 ```bash
-python .\subscriber\subscriber.py
+python publisher/publisher.py
 ```
 
----
-
-## Terminal 3
-
-Run environment publisher:
+### Start the Network Publisher
 
 ```bash
-python .\publisher\publisher.py
+python publisher/network_publisher.py
 ```
 
 ---
 
-## Terminal 4
+## MQTT Topics
 
-Run network publisher:
+### Environmental Data
 
-```bash
-python .\publisher\network_publisher.py
+```text
+sensors/enviroment
 ```
+
+Contains:
+
+* Temperature
+* Humidity
+* Air Quality
+
+### Network Data
+
+```text
+sensors/network
+```
+
+Contains:
+
+* Sensor ID
+* Gateway Connection
+* Signal Strength
 
 ---
 
-# Database Roles
+## Alert Generation
 
-## MongoDB
+Alerts are generated when:
+
+* Temperature > 35°C
+* Humidity > 70%
+* Air Quality > 150
+
+Generated alerts are stored in MongoDB.
+
+---
+
+## Database Usage
+
+### MongoDB
 
 Stores:
 
-* environment events
-* network events
-* alerts
-* flexible event documents
+* Environmental sensor readings
+* Generated alerts
+* Network events
 
----
-
-## MySQL
+### MySQL
 
 Stores:
 
-* validated environmental measurements
+* Validated environmental readings
 
----
+Validation rules:
 
-## Neo4j
+* Temperature between -50 and 60
+* Humidity between 0 and 100
+* Air Quality ≥ 0
+
+### Neo4j
 
 Stores:
 
-* sensor relationships
-* gateway connections
-* location topology
+* Sensors
+* Gateways
+* Locations
+* CONNECTED_TO relationships
 
+---
 
+## Expected Results
 
-Author: Alex Demse
+After running the publishers:
 
-University of Messina - Data Analysis Program
+### MongoDB
+
+* Sensor readings inserted
+* Alerts generated when thresholds are exceeded
+
+### MySQL
+
+* Valid environmental data inserted into sensor_readings
+
+### Neo4j
+
+* Sensor-to-Gateway relationships created
+* Location relationships stored
+
+---
+
+## Author
+
+Alex Demse
+
+University of Messina
+
+Data Analysis Program
