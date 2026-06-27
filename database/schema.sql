@@ -11,3 +11,6 @@ CREATE TABLE IF NOT EXISTS sensor_readings (
     air_quality FLOAT,
     timestamp DATETIME
 );
+
+-- Speeds up the CLI "aggregate by location / time" queries.
+CREATE INDEX idx_location_time ON sensor_readings (location, timestamp);
