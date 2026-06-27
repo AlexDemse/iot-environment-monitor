@@ -1,7 +1,3 @@
-# cli.py
-# Simple text menu for the end user.
-# Run with:  python cli.py
-
 import json
 
 import paho.mqtt.client as mqtt

@@ -80,7 +80,7 @@ Menu options:
 
 ## Configuration
 
-All credentials and thresholds live in `.env` (copy from `.env.example`).
+All credentials and thresholds live in `.env`.
 Change a password or an alert threshold there - no need to edit the code.
 
 ## Author

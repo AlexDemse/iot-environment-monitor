@@ -1,11 +1,11 @@
 # config.py
-# All settings for the project live here in one place.
+# All settings for the project.
 # Values are read from a .env file if it exists, otherwise the defaults below are used.
 
 import os
 
 
-# --- tiny .env reader (keeps things simple, no extra library needed) ---
+# --- tiny .env reader  ---
 def load_env():
     here = os.path.dirname(__file__)
     env_path = os.path.join(here, ".env")
@@ -45,7 +45,7 @@ NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "root12345")
 
-# --- Alert thresholds (no magic numbers scattered in the code) ---
+# --- Alert thresholds ---
 TEMP_THRESHOLD = float(os.getenv("TEMP_THRESHOLD", "35"))
 HUMIDITY_THRESHOLD = float(os.getenv("HUMIDITY_THRESHOLD", "70"))
 AIR_QUALITY_THRESHOLD = float(os.getenv("AIR_QUALITY_THRESHOLD", "150"))
