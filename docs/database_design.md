@@ -112,7 +112,6 @@ Neo4j stores graph relationships and network topology information.
 The project uses different databases for different strengths:
 
 | Database | Strength |
-|---|---|
 | MongoDB | flexible document storage |
 | MySQL | structured relational analysis |
 | Neo4j | relationship and graph modeling |

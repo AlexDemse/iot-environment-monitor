@@ -148,6 +148,24 @@ def menu_live():
         client.disconnect()
 
 
+# ---------- 5) Performance metrics ----------
+def menu_metrics():
+    print("\n--- Performance metrics (store time per database) ---")
+    stats = mongo_store.get_timing_stats()
+    if len(stats) == 0:
+        print("No timings recorded yet. Run the subscriber/publisher first.")
+        return
+
+    print("")
+    header = "%-10s %8s %12s %12s %12s" % (
+        "Database", "Samples", "Avg (s)", "Min (s)", "Max (s)")
+    print(header)
+    print("-" * len(header))
+    for s in stats:
+        print("%-10s %8s %12.5f %12.5f %12.5f" % (
+            s["_id"], s["samples"], s["avg"], s["min"], s["max"]))
+
+
 # ---------- main menu ----------
 def main():
     while True:
@@ -156,6 +174,7 @@ def main():
         print(" 2) View alerts")
         print(" 3) Network topology")
         print(" 4) Live monitor (stores + shows)")
+        print(" 5) Performance metrics")
         print(" 0) Exit")
         choice = input("Select: ").strip()
 
@@ -167,6 +186,8 @@ def main():
             menu_topology()
         elif choice == "4":
             menu_live()
+        elif choice == "5":
+            menu_metrics()
         elif choice == "0":
             print("Goodbye.")
             break

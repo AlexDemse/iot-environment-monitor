@@ -1,13 +1,3 @@
-# db/neo4j_store.py
-# Handles all Neo4j work: building the network graph and reading the topology.
-#
-# The graph uses five kinds of nodes:
-#   Sensor  -> Gateway   (CONNECTED_TO, with signal_strength)
-#   Sensor  -> Room      (LOCATED_IN)
-#   Room    -> Location  (PART_OF)
-#   Location-> Zone      (IN_ZONE)
-#   Gateway -> Location  (SERVES)
-
 from neo4j import GraphDatabase
 import config
 
@@ -71,3 +61,25 @@ def get_topology():
         rows.append(dict(record))
     session.close()
     return rows
+
+
+def delete_sensor(sensor_id):
+    """Remove a sensor from the graph, then clean up any nodes that are left
+    with no sensor attached (orphaned gateway/room/location/zone).
+    Shared nodes used by other sensors are kept.
+    """
+    cleanup = """
+        MATCH (s:Sensor {sensor_id: $sensor_id}) DETACH DELETE s
+    """
+    orphans = [
+        "MATCH (g:Gateway) WHERE NOT (g)<-[:CONNECTED_TO]-(:Sensor) DETACH DELETE g",
+        "MATCH (r:Room) WHERE NOT (r)<-[:LOCATED_IN]-(:Sensor) DETACH DELETE r",
+        "MATCH (l:Location) WHERE NOT (l)<-[:PART_OF]-(:Room) "
+        "AND NOT (l)<-[:SERVES]-(:Gateway) DETACH DELETE l",
+        "MATCH (z:Zone) WHERE NOT (z)<-[:IN_ZONE]-(:Location) DETACH DELETE z",
+    ]
+    session = _driver.session()
+    session.run(cleanup, sensor_id=sensor_id)
+    for q in orphans:
+        session.run(q)
+    session.close()

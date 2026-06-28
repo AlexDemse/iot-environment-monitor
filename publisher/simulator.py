@@ -1,8 +1,3 @@
-# publisher/simulator.py
-# One publisher that simulates several sensors.
-# Each loop it sends an environment reading AND a network message,
-# so MongoDB, MySQL and Neo4j all get fed.
-
 import json
 import random
 import time
@@ -12,16 +7,16 @@ from datetime import datetime
 
 import paho.mqtt.client as mqtt
 
-# Allow importing config from the project root.
+# Allow importing config and db from the project root.
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import config
+from db import mongo_store
 
 ENV_TOPIC = "sensors/environment"
 NETWORK_TOPIC = "sensors/network"
 
-# Five fixed sensors, each tied to a zone / location / room / gateway.
-# This gives Neo4j a varied 5-level graph.
-SENSORS = [
+# Default sensors used to seed the registry the first time only.
+DEFAULT_SENSORS = [
     {"sensor_id": "S001", "zone": "North_Zone",   "location": "Messina_Center",     "room": "Room_101",    "gateway": "Gateway_A"},
     {"sensor_id": "S002", "zone": "South_Zone",   "location": "Messina_Port",       "room": "Room_102",    "gateway": "Gateway_B"},
     {"sensor_id": "S003", "zone": "East_Zone",    "location": "Messina_University",  "room": "Lab_A",       "gateway": "Gateway_C"},
@@ -48,17 +43,24 @@ def make_network(sensor):
         "location": sensor["location"],
         "room": sensor["room"],
         "connected_to": sensor["gateway"],
-        "signal_strength": random.randint(60, 100),
+        "signal_strength": random.randint(50, 100),
     }
 
 
 def main():
+    # Make sure the registry has the default sensors the first time.
+    mongo_store.seed_sensors(DEFAULT_SENSORS)
+
     client = mqtt.Client()
     client.connect(config.MQTT_BROKER, config.MQTT_PORT)
     print("Publisher connected. Sending data every 5 seconds (Ctrl-C to stop).")
 
     while True:
-        sensor = random.choice(SENSORS)
+        # Reload the registry each loop so newly added sensors are included.
+        sensors = mongo_store.list_sensors()
+        if not sensors:
+            sensors = DEFAULT_SENSORS
+        sensor = random.choice(sensors)
 
         env_message = json.dumps(make_environment(sensor))
         client.publish(ENV_TOPIC, env_message)

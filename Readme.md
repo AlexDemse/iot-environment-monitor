@@ -86,3 +86,35 @@ Change a password or an alert threshold there - no need to edit the code.
 ## Author
 
 Alex Demse - University of Messina
+
+## Web Dashboard (pure Python, Streamlit)
+
+A browser dashboard with charts and analytics, written entirely in Python — no
+JavaScript or HTML. It reuses the same db/ modules and covers every CLI feature.
+
+Install the extra packages (one time):
+
+```bash
+pip install streamlit pandas
+```
+
+Run it (with the databases and subscriber/simulator running):
+
+```bash
+streamlit run webapp/streamlit_app.py
+```
+
+It opens automatically in your browser (usually http://localhost:8501) with tabs:
+
+- **Readings** - location and time-window filters, bar chart + avg/min/max table
+- **Alerts** - type filter, counts chart, recent alerts table
+- **Topology** - sensor -> gateway -> room -> location -> zone table
+- **Live feed** - most recent stored events (keep the subscriber running)
+- **Performance** - store-time chart + samples/avg/min/max table
+- **Manage** - forms to add sensors and locations
+
+New sensors are saved to a registry in MongoDB; the running simulator reads this
+registry each cycle, so added sensors begin producing data automatically.
+
+The text CLI (`python cli.py`) still works too — the dashboard is just a friendlier
+front end over the same data.

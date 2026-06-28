@@ -1,6 +1,3 @@
-# core/validation.py
-# Checks and cleans environmental data before it goes into MySQL.
-
 REQUIRED_FIELDS = [
     "sensor_id",
     "location",
@@ -12,12 +9,10 @@ REQUIRED_FIELDS = [
 
 
 def normalize_location(name):
-    """Make location spelling consistent so 'Messina_center' and
-    'Messina_Center' are treated as the same place.
-    """
+    """Make location spelling consistent """
     if name is None:
         return name
-    # Capitalize each word split by underscore, e.g. messina_center -> Messina_Center
+    # Capitalize each word split by underscore
     parts = name.split("_")
     fixed = []
     for part in parts:

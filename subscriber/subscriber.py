@@ -1,7 +1,3 @@
-# subscriber/subscriber.py
-# Thin subscriber: it only listens to MQTT and hands each message to the router.
-# All the storing logic lives in core/router.py and the db/ modules.
-
 import json
 import sys
 import os

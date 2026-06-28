@@ -1,8 +1,4 @@
-# core/alerts.py
-# Builds alert objects when readings cross the thresholds set in config.
-
 import config
-
 
 def generate_alerts(data):
     """Return a list of alert dictionaries for one environmental reading."""

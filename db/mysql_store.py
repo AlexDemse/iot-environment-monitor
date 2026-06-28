@@ -1,10 +1,6 @@
-# db/mysql_store.py
-# Handles all MySQL work: storing clean readings and running aggregate queries.
-
 import mysql.connector
 import config
 
-# Connect once and reuse.
 _connection = mysql.connector.connect(
     host=config.MYSQL_HOST,
     user=config.MYSQL_USER,
@@ -14,7 +10,6 @@ _connection = mysql.connector.connect(
 
 
 def _cursor():
-    # Make sure the connection is alive (reconnect if it dropped).
     _connection.ping(reconnect=True, attempts=3, delay=2)
     return _connection.cursor()
 
@@ -51,8 +46,6 @@ def list_locations():
 
 def aggregate_readings(location=None, hours=None):
     """Return avg/min/max temperature, humidity, air quality grouped by location.
-    location: limit to one location (or None for all).
-    hours: only count readings from the last N hours (or None for all time).
     """
     sql = """
         SELECT
@@ -83,3 +76,12 @@ def aggregate_readings(location=None, hours=None):
     rows = cursor.fetchall()
     cursor.close()
     return rows
+
+
+
+def delete_sensor_readings(sensor_id):
+    """Delete all stored readings for one sensor."""
+    cursor = _cursor()
+    cursor.execute("DELETE FROM sensor_readings WHERE sensor_id = %s", (sensor_id,))
+    _connection.commit()
+    cursor.close()
